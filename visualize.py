@@ -7,6 +7,11 @@ pose_GT_dir = par.pose_dir  #'KITTI/pose_GT/'
 predicted_result_dir = './result/'
 gradient_color = True
 
+
+KITTI = False
+Unity = True
+
+
 def plot_route(gt, out, c_gt='g', c_out='r'):
 	x_idx = 3
 	y_idx = 5
@@ -23,8 +28,12 @@ def plot_route(gt, out, c_gt='g', c_out='r'):
 
 
 # Load in GT and predicted pose
-video_list = ['00', '02', '08', '09']
-video_list += ['01', '04', '05', '06', '07', '10']
+# video_list = ['00', '02', '08', '09']
+if KITTI:
+	video_list = ['04', '05', '07', '09', '10']
+# video_list += ['01', '04', '05', '06', '07', '10']
+else:
+	video_list = ['00']
 
 
 for video in video_list:
@@ -49,6 +58,7 @@ for video in video_list:
 		# plot gradient color
 		step = 200
 		plt.clf()
+		print(gt.shape)
 		plt.scatter([gt[0][3]], [gt[0][5]], label='sequence start', marker='s', color='k')
 		for st in range(0, len(out), step):
 			end = st + step

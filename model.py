@@ -1,13 +1,25 @@
 import torch
 import torch.nn as nn
-from params import par
+import params
 from torch.autograd import Variable
 from torch.nn.init import kaiming_normal_, orthogonal_
 import numpy as np
+import pdb
+import argparse
+
+def get_args():
+    args = argparse.ArgumentParser(description='Setting which dataset to use')
+    args.unreal = True
+    args.unity = False
+    args.kitti = False
+    return args
+args = get_args()
+par = params.Parameters(args)
 
 def conv(batchNorm, in_planes, out_planes, kernel_size=3, stride=1, dropout=0):
     if batchNorm:
         return nn.Sequential(
+            # pdb.set_trace(),    
             nn.Conv2d(in_planes, out_planes, kernel_size=kernel_size, stride=stride, padding=(kernel_size-1)//2, bias=False),
             nn.BatchNorm2d(out_planes),
             nn.LeakyReLU(0.1, inplace=True),
@@ -35,6 +47,8 @@ class DeepVO(nn.Module):
         self.conv5   = conv(self.batchNorm, 512,  512, kernel_size=3, stride=2, dropout=par.conv_dropout[6])
         self.conv5_1 = conv(self.batchNorm, 512,  512, kernel_size=3, stride=1, dropout=par.conv_dropout[7])
         self.conv6   = conv(self.batchNorm, 512, 1024, kernel_size=3, stride=2, dropout=par.conv_dropout[8])
+
+        # pdb.set_trace()
         # Comput the shape based on diff image size
         __tmp = Variable(torch.zeros(1, 6, imsize1, imsize2))
         __tmp = self.encode_image(__tmp)

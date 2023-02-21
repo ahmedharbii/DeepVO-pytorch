@@ -1,5 +1,5 @@
 # predicted as a batch
-from params import par
+import params
 from model import DeepVO
 import numpy as np
 from PIL import Image
@@ -10,10 +10,42 @@ import torch
 from data_helper import get_data_info, ImageSequenceDataset
 from torch.utils.data import DataLoader
 from helper import eulerAnglesToRotationMatrix
+import pdb
+import argparse
 
-if __name__ == '__main__':    
+def get_args():
+	# Parse arguments from terminal
+	parser = argparse.ArgumentParser(
+		description='Setting which dataset to use')
+	parser.add_argument('--unity', action='store_true', default=False,
+		help='Setting Unity')
+	parser.add_argument('--unreal', action='store_true', default=True,
+		help='Setting Unreal')
+	parser.add_argument('--kitti', action='store_true', default=False,
+		help='Setting KITTI')
+	
+	args = parser.parse_args()
 
-	videos_to_test = ['04', '05', '07', '10', '09']
+	return args
+
+
+
+if __name__ == '__main__':
+	args = get_args()
+	print(args)
+
+	par = params.Parameters(args)
+
+	if par.kitti:
+		videos_to_test = ['04', '05', '07', '10', '09']
+	if par.unity:
+		#select all withing the folder:
+		# videos_to_test = [f for f in os.listdir(par.pose_dir) if os.path.isdir(os.path.join(par.pose_dir, f))]
+		videos_to_test = ['00']
+
+	if par.unreal: #what's inside the folder itself
+		videos_to_test = os.listdir(par.pose_dir)
+
 
 	# Path
 	load_model_path = par.load_model_path   #choose the model you want to load
@@ -45,15 +77,19 @@ if __name__ == '__main__':
 	fd=open('test_dump.txt', 'w')
 	fd.write('\n'+'='*50 + '\n')
 
-
+	pdb.set_trace()
 	for test_video in videos_to_test:
 		df = get_data_info(folder_list=[test_video], seq_len_range=[seq_len, seq_len], overlap=overlap, sample_times=1, shuffle=False, sort=False)
 		df = df.loc[df.seq_len == seq_len]  # drop last
+		# print(par.img_means, par.img_stds)
+		# print('df.shape: ', df.shape)
+		# print('df.head(): ', df.head())
 		dataset = ImageSequenceDataset(df, par.resize_mode, (par.img_w, par.img_h), par.img_means, par.img_stds, par.minus_point_5)
 		df.to_csv('test_df.csv')
 		dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=False, num_workers=n_workers)
 		
 		gt_pose = np.load('{}{}.npy'.format(par.pose_dir, test_video))  # (n_images, 6)
+		# pdb.set_trace()
 
 		# Predict
 		M_deepvo.eval()
@@ -61,15 +97,19 @@ if __name__ == '__main__':
 		answer = [[0.0]*6, ]
 		st_t = time.time()
 		n_batch = len(dataloader)
+		print('n_batch: ', n_batch)
 
+		# print(' ma a7a y3ny ')
 		for i, batch in enumerate(dataloader):
+			# print('msh welad mtnaka')
 			print('{} / {}'.format(i, n_batch), end='\r', flush=True)
 			_, x, y = batch
+			
 			if use_cuda:
 				x = x.cuda()
 				y = y.cuda()
 			batch_predict_pose = M_deepvo.forward(x)
-
+			
 			# Record answer
 			fd.write('Batch: {}\n'.format(i))
 			for seq, predict_pose_seq in enumerate(batch_predict_pose):
@@ -91,8 +131,12 @@ if __name__ == '__main__':
 			
 			for predict_pose_seq in batch_predict_pose:
 				# predict_pose_seq[1:] = predict_pose_seq[1:] + predict_pose_seq[0:-1]
+
+				#ang is the rotation matrix
 				ang = eulerAnglesToRotationMatrix([0, answer[-1][0], 0]) #eulerAnglesToRotationMatrix([answer[-1][1], answer[-1][0], answer[-1][2]])
+				#location is the translation matrix
 				location = ang.dot(predict_pose_seq[-1][3:])
+				#then, we add the translation matrix to the last pose
 				predict_pose_seq[-1][3:] = location[:]
 
 			# use only last predicted pose in the following prediction
@@ -120,8 +164,10 @@ if __name__ == '__main__':
 
 		# Calculate loss
 		gt_pose = np.load('{}{}.npy'.format(par.pose_dir, test_video))  # (n_images, 6)
+		print(len(gt_pose))
 		loss = 0
 		for t in range(len(gt_pose)):
+			# pdb.set_trace()
 			angle_loss = np.sum((answer[t][:3] - gt_pose[t,:3]) ** 2)
 			translation_loss = np.sum((answer[t][3:] - gt_pose[t,3:6]) ** 2)
 			loss = (100 * angle_loss + translation_loss)

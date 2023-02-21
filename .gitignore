@@ -1,9 +1,17 @@
 KITTI/images/
 KITTI/devkit/
 KITTI/pose_GT/
+Unity/
+Unreal/
 *.png
 records/
 result/
 models/
 pretrained/
 *.ipynb
+__pycache__/
+data_odometry_poses.zip
+datainfo/
+test_dump.txt
+datainfo/train_df_t000102050809_v04060710_pNone_seq5x7_sample3.pickle
+datainfo/valid_df_t000102050809_v04060710_pNone_seq5x7_sample3.pickle

@@ -8,8 +8,22 @@ from torch.utils.data import Dataset, DataLoader
 from torch.utils.data.sampler import Sampler
 from torchvision import transforms
 import time
-from params import par
+import params
 from helper import normalize_angle_delta
+
+import pdb
+import argparse
+
+#TODO: solve this args
+
+def get_args():
+    args = argparse.ArgumentParser(description='Setting which dataset to use')
+    args.unreal = True
+    args.unity = False
+    args.kitti = False
+    return args
+args = get_args()
+par = params.Parameters(args)
 
 
 def get_data_info(folder_list, seq_len_range, overlap, sample_times=1, pad_y=False, shuffle=False, sort=True):
@@ -75,6 +89,7 @@ def get_data_info(folder_list, seq_len_range, overlap, sample_times=1, pad_y=Fal
     # Sort dataframe by seq_len
     if sort:
         df = df.sort_values(by=['seq_len'], ascending=False)
+    # pdb.set_trace()
     return df
 
 
@@ -223,15 +238,28 @@ class ImageSequenceDataset(Dataset):
 
         image_path_sequence = self.image_arr[index]
         sequence_len = torch.tensor(self.seq_len_list[index])  #sequence_len = torch.tensor(len(image_path_sequence))
-        
+        # pdb.set_trace()
         image_sequence = []
         for img_path in image_path_sequence:
-            img_as_img = Image.open(img_path)
+            img_as_img = Image.open(img_path).convert('RGB')
             img_as_tensor = self.transformer(img_as_img)
+            # print(img_as_tensor.shape)
+            # print(img_as_tensor[2])
             if self.minus_point_5:
                 img_as_tensor = img_as_tensor - 0.5  # from [0, 1] -> [-0.5, 0.5]
+            #TODO
+            # print(img_as_tensor.shape)
+            # print("a7a ya welad el wes5a")
+            # print(img_as_tensor)
+            # print("bos deh")
+            # print()
+            # img_as_tensor = img_as_tensor[0:3, :, :]
+            # print(img_as_tensor.shape)
+            #printing only the dimension of the tensor ()
             img_as_tensor = self.normalizer(img_as_tensor)
+            # print(img_as_tensor.shape)
             img_as_tensor = img_as_tensor.unsqueeze(0)
+            # print(img_as_tensor.shape)
             image_sequence.append(img_as_tensor)
         image_sequence = torch.cat(image_sequence, 0)
         return (sequence_len, image_sequence, groundtruth_sequence)
