@@ -6,9 +6,9 @@ class Parameters():
 
 		#Getting arguments from command line:
 
-		Unity = args.unity
-		KITTI = args.kitti
-		Unreal = args.unreal
+		self.unity = args.unity
+		self.kitti = args.kitti
+		self.unreal = args.unreal
 
 		
 		# Path -  KITTI:
@@ -22,10 +22,10 @@ class Parameters():
 		# Unity=False
 		# Unreal = True
 
-		if KITTI:
+		if self.kitti:
 			self.data_dir =  '/home/mrblack/Projects_DL/DeepVO-pytorch/KITTI/'
-			self.image_dir = self.data_dir + 'images/'
-			self.pose_dir = self.data_dir + 'pose_GT/'
+			self.image_dir = self.data_dir + '/images/'
+			self.pose_dir = self.data_dir + '/pose_GT/'
 
 			self.train_video = ['00', '01', '02', '05', '08', '09']
 			self.valid_video = ['04', '06', '07', '10']
@@ -33,7 +33,7 @@ class Parameters():
 
 
 		# Path -  Unity:
-		if Unity:
+		if self.unity:
 			self.data_dir =  '/home/mrblack/Projects_DL/DeepVO-pytorch/Unity/back_forward/'
 			self.image_dir = self.data_dir + 'image_left/'
 			self.pose_dir = self.data_dir + 'pose_left_kitti/'
@@ -42,10 +42,11 @@ class Parameters():
 			self.valid_video = ['00']
 			self.partition=None
 
-		if Unreal:
+		if self.unreal:
 			self.data_dir =  '/home/mrblack/Projects_DL/DeepVO-pytorch/Unreal/test_image_7/'
 			self.image_dir = self.data_dir + 'image_left/'
 			self.pose_dir = self.data_dir + 'pose_left_kitti/'
+			self.timestamp_file = self.data_dir + 'ground_truth_tum.txt'
 
 			self.train_video = ['00']
 			self.valid_video = ['00']
@@ -78,7 +79,7 @@ class Parameters():
 		self.clip = None
 		self.batch_norm = True
 		# Training
-		self.epochs = 10 #250
+		self.epochs = 100 #250
 		self.batch_size = 6 #8
 		self.pin_mem = True
 		self.optim = {'opt': 'Adagrad', 'lr': 0.0005}
@@ -97,10 +98,10 @@ class Parameters():
 		# self.resume = False
 		self.resume_t_or_v = '.train'
 		
-		if KITTI:
+		if self.kitti:
 			self.load_model_path = 'models/t{}_v{}_im{}x{}_s{}x{}_b{}_rnn{}_{}.model{}'.format(''.join(self.train_video), ''.join(self.valid_video), self.img_h, self.img_w, self.seq_len[0], self.seq_len[1], self.batch_size, self.rnn_hidden_size, '_'.join([k+str(v) for k, v in self.optim.items()]), self.resume_t_or_v)
 			self.load_optimizer_path = 'models/t{}_v{}_im{}x{}_s{}x{}_b{}_rnn{}_{}.optimizer{}'.format(''.join(self.train_video), ''.join(self.valid_video), self.img_h, self.img_w, self.seq_len[0], self.seq_len[1], self.batch_size, self.rnn_hidden_size, '_'.join([k+str(v) for k, v in self.optim.items()]), self.resume_t_or_v)
-		if Unity or Unreal:
+		if self.unity or self.unreal:
 			# self.load_model_path = 'models/t000102050809_v04060710_im184x608_s5x7_b8_rnn1000_optAdagrad_lr0.0005.model.train'
 			# self.load_optimizer_path = 'models/t000102050809_v04060710_im184x608_s5x7_b8_rnn1000_optAdagrad_lr0.0005.optimizer.train'
 			self.load_model_path = 'models/VO_pretrained_unity.model.train'
@@ -109,11 +110,11 @@ class Parameters():
 
 		self.record_path = 'records/t{}_v{}_im{}x{}_s{}x{}_b{}_rnn{}_{}.txt'.format(''.join(self.train_video), ''.join(self.valid_video), self.img_h, self.img_w, self.seq_len[0], self.seq_len[1], self.batch_size, self.rnn_hidden_size, '_'.join([k+str(v) for k, v in self.optim.items()]))
 
-		if KITTI:
+		if self.kitti:
 			self.save_model_path = 'models/t{}_v{}_im{}x{}_s{}x{}_b{}_rnn{}_{}.model'.format(''.join(self.train_video), ''.join(self.valid_video), self.img_h, self.img_w, self.seq_len[0], self.seq_len[1], self.batch_size, self.rnn_hidden_size, '_'.join([k+str(v) for k, v in self.optim.items()]))
 			self.save_optimizer_path = 'models/t{}_v{}_im{}x{}_s{}x{}_b{}_rnn{}_{}.optimizer'.format(''.join(self.train_video), ''.join(self.valid_video), self.img_h, self.img_w, self.seq_len[0], self.seq_len[1], self.batch_size, self.rnn_hidden_size, '_'.join([k+str(v) for k, v in self.optim.items()]))
 		
-		if Unity or Unreal:
+		if self.unity or self.unreal:
 			self.save_model_path = 'models/VO_pretrained_unity.model.train'
 			self.save_optimizer_path = 'models/VO_pretrained_unity.optimizer.train'
 		

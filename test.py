@@ -19,7 +19,7 @@ def get_args():
 		description='Setting which dataset to use')
 	parser.add_argument('--unity', action='store_true', default=False,
 		help='Setting Unity')
-	parser.add_argument('--unreal', action='store_true', default=True,
+	parser.add_argument('--unreal', action='store_true', default=False,
 		help='Setting Unreal')
 	parser.add_argument('--kitti', action='store_true', default=False,
 		help='Setting KITTI')
@@ -29,12 +29,13 @@ def get_args():
 	return args
 
 
-
 if __name__ == '__main__':
 	args = get_args()
 	print(args)
 
 	par = params.Parameters(args)
+
+	print(par)
 
 	if par.kitti:
 		videos_to_test = ['04', '05', '07', '10', '09']
@@ -44,7 +45,7 @@ if __name__ == '__main__':
 		videos_to_test = ['00']
 
 	if par.unreal: #what's inside the folder itself
-		videos_to_test = os.listdir(par.pose_dir)
+		videos_to_test = ['00']
 
 
 	# Path
@@ -77,7 +78,7 @@ if __name__ == '__main__':
 	fd=open('test_dump.txt', 'w')
 	fd.write('\n'+'='*50 + '\n')
 
-	pdb.set_trace()
+	# pdb.set_trace()
 	for test_video in videos_to_test:
 		df = get_data_info(folder_list=[test_video], seq_len_range=[seq_len, seq_len], overlap=overlap, sample_times=1, shuffle=False, sort=False)
 		df = df.loc[df.seq_len == seq_len]  # drop last
@@ -133,7 +134,12 @@ if __name__ == '__main__':
 				# predict_pose_seq[1:] = predict_pose_seq[1:] + predict_pose_seq[0:-1]
 
 				#ang is the rotation matrix
+				#NOTE Need to be checked
+				#That's because Kitti is recorded with a car mounted camera, so the camera is rotated around the y axis (only yaw)
+				# if par.kitti:
 				ang = eulerAnglesToRotationMatrix([0, answer[-1][0], 0]) #eulerAnglesToRotationMatrix([answer[-1][1], answer[-1][0], answer[-1][2]])
+				# if par.unity or par.unreal:
+				# 	ang = eulerAnglesToRotationMatrix([answer[-1][1], answer[-1][0], answer[-1][2]])
 				#location is the translation matrix
 				location = ang.dot(predict_pose_seq[-1][3:])
 				#then, we add the translation matrix to the last pose

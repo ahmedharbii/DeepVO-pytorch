@@ -1,15 +1,33 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import time
-from params import par
+import params
+import argparse
+
+def get_args():
+	# Parse arguments from terminal
+	parser = argparse.ArgumentParser(
+		description='Setting which dataset to use')
+	parser.add_argument('--unity', action='store_true', default=False,
+		help='Setting Unity')
+	parser.add_argument('--unreal', action='store_true', default=False,
+		help='Setting Unreal')
+	parser.add_argument('--kitti', action='store_true', default=False,
+		help='Setting KITTI')
+	
+	args = parser.parse_args()
+
+	return args
+args = get_args()
+par = params.Parameters(args)
+
 
 pose_GT_dir = par.pose_dir  #'KITTI/pose_GT/'
 predicted_result_dir = './result/'
 gradient_color = True
 
 
-KITTI = False
-Unity = True
+
 
 
 def plot_route(gt, out, c_gt='g', c_out='r'):
@@ -29,10 +47,10 @@ def plot_route(gt, out, c_gt='g', c_out='r'):
 
 # Load in GT and predicted pose
 # video_list = ['00', '02', '08', '09']
-if KITTI:
+if par.kitti:
 	video_list = ['04', '05', '07', '09', '10']
 # video_list += ['01', '04', '05', '06', '07', '10']
-else:
+if par.unity or par.unreal:
 	video_list = ['00']
 
 

@@ -24,6 +24,8 @@ def get_args():
     return args
 args = get_args()
 par = params.Parameters(args)
+print(par.pose_dir)
+print(par.image_dir)
 
 
 def get_data_info(folder_list, seq_len_range, overlap, sample_times=1, pad_y=False, shuffle=False, sort=True):

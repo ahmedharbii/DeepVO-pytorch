@@ -4,10 +4,27 @@ import numpy as np
 import os
 import time
 import pandas as pd
-from params import par
+import params
+import argparse
 from model import DeepVO
 from data_helper import get_data_info, SortedRandomBatchSampler, ImageSequenceDataset, get_partition_data_info
+def get_args():
+	# Parse arguments from terminal
+	parser = argparse.ArgumentParser(
+		description='Setting which dataset to use')
+	parser.add_argument('--unity', action='store_true', default=False,
+		help='Setting Unity')
+	parser.add_argument('--unreal', action='store_true', default=False,
+		help='Setting Unreal')
+	parser.add_argument('--kitti', action='store_true', default=False,
+		help='Setting KITTI')
+	
+	args = parser.parse_args()
 
+	return args
+
+args = get_args()
+par = params.Parameters(args)
 
 # Write all hyperparameters to record_path
 mode = 'a' if par.resume else 'w'
